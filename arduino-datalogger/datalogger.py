@@ -1,25 +1,39 @@
+import warnings
 import serial
-import struct
-import time
+import serial.tools.list_ports
 import datetime
 import msvcrt
-from math import sqrt, fabs
+
+arduino_ports = [
+	p.device
+	for p in serial.tools.list_ports.comports()
+	if 'Arduino' in p.description
+]
+
+if not arduino_ports:
+	raise IOError("No Arduino found")
+if len(arduino_ports) > 1:
+	warnings.warn('Multiple Arduinos found - using the first')
 
 ser = serial.Serial()
-ser.baudrate = 115200 # baud rate de l'arduino
-ser.port = 'COM3' # port de l'arduino
+ser.port = arduino_ports[0]
+baudrate = input('Please enter baudrate and press ENTER ')
+ser.baudrate = baudrate  # Arduino baud rate
 ser.open()
-print("Serial is open: ")
-print(ser.is_open)
-filename = "Log_"+datetime.datetime.now().strftime("%Y-%B-%d_%I-%M-%p")+".txt"
-log = open(filename, 'w+')
 
-while True:
-	log.write(bytes.decode(ser.readline()))
-	ser.flushInput()
-	if msvcrt.kbhit():
-		if ord(msvcrt.getch()) == 27:
-	    		break
+if ser.is_open == False:
+	print("Couldn't open serial port. Verify baudrate.")
+else:
+	print('Connected to Arduino')
+	filename = "Log_" + datetime.datetime.now().strftime("%Y-%B-%d_%I-%M-%p") + ".txt"
+	log = open(filename, 'w+', 1)
+	print('Starting data logging, press ESC key to stop...')
+
+	while True:
+		log.write(bytes.decode(ser.readline()))
+		if msvcrt.kbhit():
+			if ord(msvcrt.getch()) == 27:
+				break
 log.close()
 ser.close()
-print("Done.")
+print("Done, exiting program...")
