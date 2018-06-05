@@ -1,5 +1,5 @@
 ARDUINO DATALOGGER
-=====================
+==================
 This software logs incoming data from an Arduino microcontroller
  connected via a serial port to a computer. It automatically connects
  to the first Arduino detected.
